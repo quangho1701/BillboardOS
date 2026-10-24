@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BillboardOS research and implementation plan for the Coinbase x402 Payment Agents track at Cal Hacks 13.0.">
+  <title>BillboardOS × x402 | Coinbase track research</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172038;
+      --muted: #59657b;
+      --line: #dce3f0;
+      --paper: #f5f7fc;
+      --card: #fff;
+      --blue: #174de8;
+      --blue-dark: #1037ad;
+      --aqua: #ddf9f3;
+      --aqua-ink: #06624f;
+      --orange: #fff1dc;
+      --orange-ink: #805018;
+      --shadow: 0 18px 48px rgb(23 32 56 / 8%);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue-dark); text-underline-offset: 3px; }
+    a:hover { color: var(--blue); }
+    a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 2px; }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+    .topbar {
+      background: #101b38;
+      color: #dbe8ff;
+      border-bottom: 1px solid #3c4b70;
+    }
+    .topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 56px; }
+    .brand { color: white; font-weight: 800; letter-spacing: .015em; text-decoration: none; }
+    .topbar small { color: #c1d0f0; }
+    .hero {
+      overflow: hidden;
+      background: radial-gradient(circle at 80% 18%, #355ada 0, transparent 34%), linear-gradient(125deg, #0d1b3c, #112969 66%, #142c76);
+      color: white;
+      padding: 68px 0 62px;
+    }
+    .eyebrow { text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; font-weight: 800; color: #a9dcff; }
+    h1 { max-width: 880px; font-size: clamp(2.4rem, 5vw, 4.3rem); line-height: 1.06; letter-spacing: -.055em; margin: 15px 0 22px; }
+    .hero p { max-width: 800px; font-size: 1.2rem; color: #e1eaff; margin: 0; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .pill { display: inline-block; padding: 6px 12px; border-radius: 999px; background: rgb(255 255 255 / 13%); color: white; font-size: .82rem; font-weight: 650; }
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 34px; padding-top: 36px; padding-bottom: 70px; }
+    .side { align-self: start; position: sticky; top: 20px; }
+    .side-label { margin: 0 0 10px; color: var(--muted); font-size: .73rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; }
+    .side nav { display: grid; gap: 3px; }
+    .side a { text-decoration: none; font-size: .91rem; padding: 6px 9px; border-left: 2px solid transparent; }
+    .side a:hover, .side a:focus-visible { background: #e8eefb; border-left-color: var(--blue); }
+    main { min-width: 0; }
+    section { scroll-margin-top: 24px; margin: 0 0 38px; }
+    h2 { font-size: clamp(1.5rem, 2.2vw, 2rem); line-height: 1.2; letter-spacing: -.025em; margin: 0 0 16px; }
+    h3 { font-size: 1.11rem; line-height: 1.3; margin: 25px 0 8px; }
+    p { margin: 0 0 14px; }
+    ul, ol { padding-left: 1.4em; margin: 10px 0 16px; }
+    li { margin: 5px 0; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+    .callout { border-left: 5px solid var(--blue); background: #eaf0ff; padding: 17px 19px; border-radius: 0 12px 12px 0; margin: 18px 0; }
+    .callout.warn { border-left-color: #c17d1b; background: var(--orange); }
+    .callout.good { border-left-color: #0b9b79; background: var(--aqua); }
+    .callout p:last-child { margin-bottom: 0; }
+    .kicker { color: var(--blue-dark); text-transform: uppercase; font-weight: 800; letter-spacing: .12em; font-size: .72rem; margin: 0 0 10px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .grid .card { box-shadow: none; }
+    .grid h3 { margin-top: 0; }
+    .grid p:last-child { margin-bottom: 0; }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; padding: 17px; border: 1px solid #bfd0f1; background: #edf3ff; border-radius: 12px; margin: 20px 0; }
+    .flow span { padding: 7px 10px; background: white; border: 1px solid #c8d4ec; border-radius: 8px; font-size: .87rem; font-weight: 700; }
+    .flow b { color: var(--blue); }
+    .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 13px; background: white; }
+    table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .91rem; }
+    th, td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    th { background: #eaf0fc; color: #19376f; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+    tr:last-child td { border-bottom: 0; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+    code { background: #edf1f8; border-radius: 4px; padding: .08em .3em; font-size: .9em; overflow-wrap: anywhere; }
+    pre { overflow-x: auto; border-radius: 12px; padding: 19px; background: #12213d; color: #edf4ff; line-height: 1.5; font-size: .86rem; }
+    pre code { background: none; padding: 0; color: inherit; }
+    .steps { list-style: none; padding: 0; counter-reset: step; }
+    .steps li { counter-increment: step; position: relative; padding: 0 0 18px 45px; margin: 0; border-left: 2px solid #cdd8ef; }
+    .steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .steps li::before { content: counter(step); position: absolute; left: -16px; top: 0; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: white; background: var(--blue); font-size: .85rem; font-weight: 800; }
+    .steps strong { display: block; }
+    .mini { font-size: .88rem; color: var(--muted); }
+    .source-list { columns: 2; column-gap: 30px; }
+    .source-list li { break-inside: avoid; margin: 0 0 9px; }
+    footer { background: #101b38; color: #dbe8ff; padding: 26px 0; font-size: .88rem; }
+    footer a { color: #b7d5ff; }
+    @media (max-width: 840px) {
+      .layout { display: block; }
+      .side { position: static; margin-bottom: 32px; }
+      .side nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .wrap { padding: 0 16px; }
+      .hero { padding: 48px 0; }
+      .hero p { font-size: 1.04rem; }
+      .grid { grid-template-columns: 1fr; }
+      .side nav { grid-template-columns: 1fr; }
+      .card { padding: 18px; }
+      .source-list { columns: 1; }
+    }
+    @media print {
+      body { background: white; color: black; font-size: 11pt; }
+      .topbar, .side { display: none; }
+      .hero { background: white; color: black; padding: 0 0 18px; }
+      .hero p, .eyebrow { color: black; }
+      .pill { background: #eee; color: black; }
+      .layout { display: block; padding: 0; }
+      .card { box-shadow: none; }
+      section, .card, .callout { break-inside: avoid; }
+      a { color: black; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="https://github.com/PhongCT1105/BillboardOS">BILLBOARD<span aria-hidden="true">/</span>OS</a>
+      <small>Research brief · 24 October 2026</small>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Cal Hacks 13.0 · Coinbase Payment Agents</div>
+      <h1>When an agent buys a billboard slot, the screen changes.</h1>
+      <p>A research-backed x402 plan for BillboardOS: an advertiser agent discovers inventory, accepts a bounded quote, pays with test USDC, and receives a booking and playback receipt.</p>
+      <div class="hero-meta">
+        <span class="pill">Protocol: x402 v2</span>
+        <span class="pill">Demo rail: Base Sepolia USDC</span>
+        <span class="pill">Status: proposed, not implemented</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap layout">
+    <aside class="side" aria-label="Page sections">
+      <p class="side-label">On this page</p>
+      <nav>
+        <a href="#decision">Recommendation</a>
+        <a href="#track">Sponsor brief</a>
+        <a href="#protocol">What x402 does</a>
+        <a href="#mcp">MCP map</a>
+        <a href="#architecture">BillboardOS flow</a>
+        <a href="#payments">Payment design</a>
+        <a href="#build">Build order</a>
+        <a href="#demo">Judge demo</a>
+        <a href="#sources">Sources</a>
+      </nav>
+    </aside>
+
+    <main id="main">
+      <section id="decision">
+        <p class="kicker">The decision</p>
+        <h2>Make the paid booking the center of the product.</h2>
+        <div class="callout good">
+          <p><strong>Recommended pitch:</strong> An advertiser agent buys a specific digital billboard slot through an x402-protected endpoint. BillboardOS holds the scarce inventory, confirms the booking only after payment settlement, plays the approved creative, and produces separate booking and playback receipts.</p>
+        </div>
+        <p>This is a direct application of the repository's existing <a href="https://github.com/PhongCT1105/BillboardOS/blob/main/docs/architecture/overview.md">quote → hold → payment → booking → playback</a> design. It is more distinctive for BillboardOS than a generic paid-research agent. The repository remains a documentation scaffold; this page specifies an integration rather than claiming one exists.</p>
+        <div class="grid">
+          <div class="card"><h3>Buyer value</h3><p>An advertiser can request the right screen and time, state a maximum budget, and receive evidence of what was bought and what played.</p></div>
+          <div class="card"><h3>Operator value</h3><p>A small screen owner can quote and sell inventory, enforce a price floor, prevent double booking, and reconcile payment exceptions.</p></div>
+        </div>
+      </section>
+
+      <section id="track">
+        <p class="kicker">Sponsor requirements</p>
+        <h2>What Coinbase will judge</h2>
+        <p>The <a href="https://drive.google.com/file/d/12TnPLguduV3gh1zY_TJ176XmVDz2RGW9/view?usp=sharing">Coinbase Cal Hacks brief</a> divides the challenge into Payment Agents and Trading Agents. Payment Agents should be able to buy, earn, or both. Judges emphasize usefulness, reliable technical design, ease of reuse, and actionable product feedback. Real-money transactions are not required, and a working integration or reusable skill is eligible without a standalone app.</p>
+        <div class="callout">
+          <p><strong>Submission evidence:</strong> project summary; a working example and setup instructions; a short architecture description with controls and limitations; and builder feedback naming a blocker, workaround, and desired Coinbase capability.</p>
+        </div>
+        <p class="mini">Prize eligibility in the linked brief includes age, residency, and verified Coinbase-account requirements. The team should recheck the original terms before submitting.</p>
+      </section>
+
+      <section id="protocol">
+        <p class="kicker">The protocol</p>
+        <h2>x402 is a payment handshake, not a booking engine.</h2>
+        <p>A resource server answers an unpaid request with HTTP <code>402 Payment Required</code> and a quote containing the amount, asset, network, recipient, and accepted payment scheme. The client signs an authorization and retries. A facilitator can verify and settle it. HTTP v2 carries these messages in <code>PAYMENT-REQUIRED</code>, <code>PAYMENT-SIGNATURE</code>, and <code>PAYMENT-RESPONSE</code> headers. <a href="https://docs.cdp.coinbase.com/x402/how-it-works">Coinbase flow</a> · <a href="https://docs.x402.org/core-concepts/http-402">x402 headers</a></p>
+        <div class="flow" aria-label="Request and payment sequence">
+          <span>Request slot</span><b>→</b><span>402 quote</span><b>→</b><span>Budget check</span><b>→</b><span>Signed retry</span><b>→</b><span>Settlement</span><b>→</b><span>Booking</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Scheme</th><th>Meaning</th><th>BillboardOS choice</th></tr></thead>
+            <tbody>
+              <tr><td><code>exact</code></td><td>One known price for one request.</td><td>Use for the first paid slot booking.</td></tr>
+              <tr><td><code>upto</code></td><td>Authorize a maximum; settle actual usage.</td><td>Useful later for metered data or inference.</td></tr>
+              <tr><td><code>batch-settlement</code></td><td>Aggregate many tiny purchases against a channel.</td><td>Defer until transaction volume warrants it.</td></tr>
+              <tr><td><code>auth-capture</code></td><td>Escrow-style capture, void, or refund semantics in the broader protocol.</td><td>Do not assume CDP Facilitator support; its published Base table currently lists the first three schemes.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mini">Sources: <a href="https://docs.x402.org/schemes/overview">x402 scheme definitions</a> and <a href="https://docs.cdp.coinbase.com/x402/seller/facilitator">CDP Facilitator support matrix</a>.</p>
+      </section>
+
+      <section id="mcp">
+        <p class="kicker">Agent tooling</p>
+        <h2>Which MCP does what?</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Surface</th><th>Useful calls or behavior</th><th>Role in this project</th></tr></thead>
+            <tbody>
+              <tr><td>Coinbase MCP / Coinbase for Agents</td><td><code>coinbase_x402_resources</code>, <code>coinbase_x402_fetch</code>, <code>coinbase_x402_pay</code>; access depends on account and client.</td><td>Optional sponsor-specific agent demonstration. Its fetch flow is centered on curated services and retail Base USDC.</td></tr>
+              <tr><td>Wallet MCP</td><td><code>initiate_x402_request</code> then <code>complete_x402_request</code>, with user approval for payment.</td><td>Useful if the buyer should approve each purchase manually.</td></tr>
+              <tr><td>CDP MCP</td><td><code>cdp_help</code>, <code>cdp_template</code>, and generated <code>cdp_*</code> API tools.</td><td>Builder tooling for wallets, faucet, and CDP API operations.</td></tr>
+              <tr><td>Bazaar MCP</td><td><code>search_resources</code>, <code>proxy_tool_call</code>, <code>validate_endpoint</code>.</td><td>Optional discovery or validation for a publicly hosted paid HTTP service.</td></tr>
+              <tr><td>BillboardOS MCP</td><td>Tools defined by the team: <code>search_inventory</code>, <code>quote_campaign</code>, <code>create_hold</code>, <code>get_booking</code>, <code>get_playback_receipt</code>.</td><td>Typed, bounded interface for the advertiser agent. The actual purchase can be an x402-protected HTTP call.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mini">Sources: <a href="https://docs.cdp.coinbase.com/ai-agents/coinbase-for-agents/coinbase-mcp">Coinbase MCP</a> · <a href="https://docs.cdp.coinbase.com/ai-agents/coinbase-for-agents/wallet-mcp">Wallet MCP</a> · <a href="https://docs.cdp.coinbase.com/ai-agents/cdp-for-agents/cdp-mcp">CDP MCP</a> · <a href="https://docs.cdp.coinbase.com/x402/buyer/mcp-payments">Bazaar MCP</a>. Proposed BillboardOS tool names are design choices, not existing integrations.</p>
+      </section>
+
+      <section id="architecture">
+        <p class="kicker">Integration blueprint</p>
+        <h2>A specific slot, a specific quote, a specific payment.</h2>
+        <ol class="steps">
+          <li><strong>Quote.</strong> Store an immutable snapshot: slot ID, price in atomic units, asset, network, pay-to address, expiry, and version. The pricing service can explain audience and time-of-day factors, while enforcing the operator floor.</li>
+          <li><strong>Hold.</strong> Atomically reserve the slot for one buyer. Create a purchase intent tied to that hold and its quote. A second buyer must fail or choose another slot.</li>
+          <li><strong>Challenge.</strong> Protect <code>POST /api/purchases/:holdId</code> with x402. Derive the payment requirement from the stored quote. The Foundation's HTTP route type supports a request-dependent <code>price</code> function.</li>
+          <li><strong>Pay and reconcile.</strong> The buyer checks the actual 402 quote against its budget and signs through a CDP-managed wallet. Record the payment attempt and settlement evidence against the purchase intent.</li>
+          <li><strong>Confirm and deliver.</strong> Only settled payment for the active intent can create a booking. After creative approval, schedule the screen and emit a separate playback receipt.</li>
+        </ol>
+        <div class="callout warn">
+          <p><strong>Price consistency:</strong> audience counts or demand may change between the first request and paid retry. Both requests must resolve to the same immutable quote. Never silently recalculate and charge for a different slot or price.</p>
+        </div>
+        <p>For the first testnet build, use TypeScript with <code>CdpX402Client({ environment: "development" })</code> on the buyer and the CDP Facilitator with the x402 HTTP resource server on the seller. The official guides cover a managed wallet, Base Sepolia USDC faucet, payment wrapper, and settlement. <a href="https://docs.cdp.coinbase.com/x402/buyer/quickstart">Buyer quickstart</a> · <a href="https://docs.cdp.coinbase.com/x402/seller/quickstart">Seller quickstart</a> · <a href="https://github.com/x402-foundation/x402/blob/main/typescript/packages/core/src/http/x402HTTPResourceServer.ts">Dynamic price type</a>.</p>
+      </section>
+
+      <section id="payments">
+        <p class="kicker">Correctness and recovery</p>
+        <h2>Payment authorization and settlement are different states.</h2>
+        <p>The default <code>exact</code> authorization flow verifies a signature before work and settles after work. For this hackathon's scarce inventory, consider <code>exact</code> with an upfront payment flow so settlement precedes the booking handler. Precheck the active hold and keep a short-lived purchase intent. If payment succeeds but booking fails, record a paid exception for authorized resolution; upfront payment does not provide an automatic application refund. <a href="https://docs.cdp.coinbase.com/x402/seller/production-configuration">Coinbase payment-flow guide</a>.</p>
+        <pre><code>AVAILABLE → HELD → PAYMENT_PENDING → BOOKED → SCHEDULED → PLAYED
+                         ↘ PAYMENT_UNKNOWN → REVIEW
+BOOKED or SCHEDULED → DELIVERY_FAILED → REVIEW</code></pre>
+        <ul>
+          <li><strong>Pending settlement:</strong> preserve the original payment and transaction reference; do not request another payment until the original outcome is reconciled.</li>
+          <li><strong>Duplicate request:</strong> reuse one logical payment ID and one purchase-intent ID; a retry cannot create a second booking.</li>
+          <li><strong>Wrong terms:</strong> reject a mismatch in slot, quote version, amount, asset, network, recipient, or expiry.</li>
+          <li><strong>Late payment:</strong> never move a settled payment to a different slot automatically. Open a paid exception.</li>
+          <li><strong>Playback:</strong> record device, timestamp, creative hash, and status. A playback receipt is evidence that the device displayed the creative; it is not proof of impressions or sales.</li>
+        </ul>
+        <p>Coinbase documents a <code>settlement_pending</code> outcome where a transaction may still confirm. The x402 payment-identifier extension addresses retry deduplication. <a href="https://docs.cdp.coinbase.com/x402/seller/settlement-pending">Settlement reconciliation</a> · <a href="https://docs.x402.org/extensions/payment-identifier">Payment identifier</a>.</p>
+        <p>The existing <a href="https://github.com/PhongCT1105/BillboardOS/blob/main/docs/architecture/data-model.md">data-model note</a> correctly flags that a payment event cannot require a booking ID before confirmation. Link payment events first to a hold or purchase intent, then attach the booking when it exists.</p>
+      </section>
+
+      <section id="build">
+        <p class="kicker">Hackathon execution</p>
+        <h2>Build the economic loop before breadth.</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Order</th><th>Minimum proof</th><th>Why it matters</th></tr></thead>
+            <tbody>
+              <tr><td>1. One screen and slot</td><td>Device ID, schedule, available state, approved creative.</td><td>Makes the transaction tangible.</td></tr>
+              <tr><td>2. Quote and exclusive hold</td><td>One winner when two buyers request the same slot.</td><td>Proves scarce inventory is controlled.</td></tr>
+              <tr><td>3. Real x402 on Base Sepolia</td><td>402 challenge, signed retry, settlement result, test transaction.</td><td>Turns the Coinbase integration into observed behavior.</td></tr>
+              <tr><td>4. Booking and screen change</td><td>Settled payment causes one booking and visible playback.</td><td>Completes the user outcome.</td></tr>
+              <tr><td>5. Agent trace and exception</td><td>Budget check, chosen slot, rejected collision or pending payment.</td><td>Shows bounded autonomy and recovery.</td></tr>
+              <tr><td>6. Reuse package</td><td>Clean setup, test wallet instructions, short recorded demo.</td><td>Meets the sponsor's reuse criterion.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <p><strong>Priority adjustment:</strong> the current <a href="https://github.com/PhongCT1105/BillboardOS/blob/main/docs/product/requirements.md">requirements</a> place verified payment in P0 but real x402 integration in P1. For the Coinbase submission, move a genuine settled testnet x402 exchange into P0. Clearly label camera simulations, demo prices, and any other mock components.</p>
+        </div>
+      </section>
+
+      <section id="demo">
+        <p class="kicker">Judge-facing script</p>
+        <h2>Two minutes, one purchase, one exception.</h2>
+        <ol>
+          <li><strong>0–20 seconds:</strong> show the screen and available ad slot. An advertiser asks its agent for a campaign under a budget.</li>
+          <li><strong>20–45 seconds:</strong> agent explains the chosen slot, fixed quote, operator floor, and exclusive hold.</li>
+          <li><strong>45–75 seconds:</strong> show the actual 402, budget check, signed retry, and settlement reference. Label USDC as Base Sepolia test funds.</li>
+          <li><strong>75–100 seconds:</strong> booking confirms, approved creative appears, and separate payment and playback receipts are visible.</li>
+          <li><strong>100–120 seconds:</strong> second buyer attempts the same slot and is blocked, or a pending payment opens a review item without creating another charge.</li>
+        </ol>
+        <p>Submit a working example, setup instructions, architecture and controls, and one concrete piece of Coinbase builder feedback. Useful feedback candidates are dynamic quote configuration, pending settlement in scarce-inventory flows, and distinctions among the Coinbase MCP, CDP SDK, and Bazaar paths. <a href="https://github.com/PhongCT1105/BillboardOS/blob/main/docs/demo/judging.md">BillboardOS demo plan</a> · <a href="https://drive.google.com/file/d/12TnPLguduV3gh1zY_TJ176XmVDz2RGW9/view?usp=sharing">Sponsor brief</a>.</p>
+      </section>
+
+      <section id="sources">
+        <p class="kicker">Primary references</p>
+        <h2>Research sources</h2>
+        <ul class="source-list">
+          <li><a href="https://drive.google.com/file/d/12TnPLguduV3gh1zY_TJ176XmVDz2RGW9/view?usp=sharing">Coinbase Cal Hacks track brief</a></li>
+          <li><a href="https://docs.cdp.coinbase.com/x402/welcome">Coinbase x402 overview</a></li>
+          <li><a href="https://docs.cdp.coinbase.com/x402/how-it-works">Coinbase x402 payment flow</a></li>
+          <li><a href="https://docs.x402.org/core-concepts/http-402">x402 HTTP v2 headers</a></li>
+          <li><a href="https://github.com/x402-foundation/x402/blob/main/specs/transports-v2/mcp.md">x402 MCP transport specification</a></li>
+          <li><a href="https://docs.cdp.coinbase.com/x402/seller/production-configuration">Seller payment-flow configuration</a></li>
+          <li><a href="https://docs.cdp.coinbase.com/x402/seller/settlement-pending">Settlement pending and reconciliation</a></li>
+          <li><a href="https://docs.cdp.coinbase.com/x402/buyer/client-configuration">Buyer spend controls</a></li>
+          <li><a href="https://docs.cdp.coinbase.com/ai-agents/coinbase-for-agents/coinbase-mcp">Coinbase MCP tool inventory</a></li>
+          <li><a href="https://docs.cdp.coinbase.com/x402/buyer/mcp-payments">Bazaar MCP discovery and payment</a></li>
+          <li><a href="https://github.com/coinbase/cdp-sdk/blob/main/examples/typescript/x402/clients/mcp/simple.ts">Coinbase runnable MCP buyer example</a></li>
+          <li><a href="https://github.com/coinbase/cdp-sdk/blob/main/examples/typescript/x402/servers/mcp/server.ts">Coinbase runnable MCP seller example</a></li>
+        </ul>
+        <p class="mini">Research snapshot: 24 October 2026. Product availability, pricing, SDK signatures, and sponsor rules can change; verify live tools and the original sponsor brief before submission.</p>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <div class="wrap">BillboardOS × x402 · A proposed implementation plan, with real and planned capabilities labeled separately. <a href="https://github.com/PhongCT1105/BillboardOS">Return to the repository</a>.</div>
+  </footer>
+</body>
+</html>

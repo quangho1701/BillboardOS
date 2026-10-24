@@ -8,13 +8,14 @@ BillboardOS is a Cal Hacks 13.0 hackathon project: a network of AI-assisted digi
 
 ## Documentation hub
 
-**[Open the documentation index](docs/index.md)** · [Competition guide](docs/competition/index.md) · [All sponsor tracks](docs/competition/sponsor-tracks.md) · [Original guide: extracted text](docs/competition/official-guide-text.md) · [Product vision](docs/product/vision.md) · [System architecture](docs/architecture/overview.md) · [MVP roadmap](docs/development/roadmap.md)
+**[Open the documentation index](docs/index.md)** · [Coinbase x402 research](docs/competition/coinbase-x402-research.html) · [Competition guide](docs/competition/index.md) · [All sponsor tracks](docs/competition/sponsor-tracks.md) · [Original guide: extracted text](docs/competition/official-guide-text.md) · [Product vision](docs/product/vision.md) · [System architecture](docs/architecture/overview.md) · [MVP roadmap](docs/development/roadmap.md)
 
 | Focus | Documentation |
 |---|---|
 | Original hackathon rules | [Event guide summary](docs/competition/index.md) · [extracted source text](docs/competition/official-guide-text.md) |
 | All sponsor tracks & prize references | [Sponsor catalog](docs/competition/sponsor-tracks.md) |
 | Target sponsors and eligibility plan | [Track strategy](docs/competition/track-strategy.md) |
+| Coinbase x402 implementation plan | [Research brief and demo blueprint](docs/competition/coinbase-x402-research.html) |
 | Original project brainstorm | [Ideation](docs/notes/ideation.md) · [original text](references/original/pasted.txt) |
 | Product requirements | [Vision](docs/product/vision.md) · [MVP acceptance tests](docs/product/requirements.md) |
 | Engineering | [Overview](docs/architecture/overview.md) · [Agents](docs/architecture/agents.md) · [Payments & risk](docs/architecture/payments-and-risk.md) · [Data model](docs/architecture/data-model.md) |

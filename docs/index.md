@@ -10,6 +10,7 @@
 |---|---|
 | Checking official competition rules | [Competition guide](competition/index.md), [all sponsor tracks](competition/sponsor-tracks.md) |
 | Deciding what to enter | [Track strategy](competition/track-strategy.md) |
+| Building for Coinbase x402 | [Research brief and BillboardOS payment blueprint](competition/coinbase-x402-research.html) |
 | New to the idea | [Vision](product/vision.md), [original ideation](notes/ideation.md) |
 | Building the MVP | [Requirements](product/requirements.md), [architecture](architecture/overview.md), [roadmap](development/roadmap.md) |
 | Building agents or finance | [Agent protocol](architecture/agents.md), [payment and risk](architecture/payments-and-risk.md) |
